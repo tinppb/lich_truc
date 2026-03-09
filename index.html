@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LỊCH TRỰC</title>
+
+<style>
+
+body{
+font-family:system-ui;
+margin:0;
+background:linear-gradient(135deg,#eef2f7,#dfe9f7);
+display:flex;
+justify-content:center;
+padding:10px;
+}
+
+.container{
+width:100%;
+max-width:900px;
+background:white;
+border-radius:16px;
+box-shadow:0 8px 20px rgba(0,0,0,0.15);
+padding:15px;
+}
+
+h1{
+text-align:center;
+margin:5px 0 10px;
+}
+
+.controls{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+button{
+padding:6px 12px;
+border-radius:8px;
+border:1px solid #ccc;
+background:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#f0f0f0;
+}
+
+#monthLabel{
+font-weight:600;
+font-size:18px;
+}
+
+.squad-select{
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:10px;
+}
+
+.calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+}
+
+.header{
+text-align:center;
+font-weight:bold;
+padding:6px;
+background:#f3f4f7;
+border:1px solid #ddd;
+}
+
+.day{
+border:1px solid #eee;
+height:85px;
+padding:4px;
+box-sizing:border-box;
+display:flex;
+flex-direction:column;
+}
+
+.date{
+font-weight:bold;
+font-size:14px;
+}
+
+.today{
+background:#e8fff1;
+border:2px solid #2ecc71;
+}
+
+.today-label{
+font-size:10px;
+color:#27ae60;
+font-weight:bold;
+}
+
+.tag{
+font-size:12px;
+padding:2px 6px;
+border-radius:5px;
+margin-top:2px;
+color:white;
+display:inline-block;
+}
+
+.phuong{background:#e74c3c;}
+.than{background:#3498db;}
+.tien{background:#9b59b6;}
+.hoa{background:#f39c12;}
+.pho{background:#16a085;}
+
+@media(max-width:600px){
+
+.day{
+height:70px;
+font-size:12px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>LỊCH TRỰC 2026</h1>
+
+<div class="controls">
+<button onclick="prevMonth()">◀</button>
+<div id="monthLabel"></div>
+<button onclick="nextMonth()">▶</button>
+<button onclick="goToday()">Hôm nay</button>
+</div>
+
+<div class="squad-select">
+<label><input type="checkbox" value="Phương" checked> Phương</label>
+<label><input type="checkbox" value="Thân" checked> Thân</label>
+<label><input type="checkbox" value="Tiến" checked> Tiến</label>
+<label><input type="checkbox" value="Hoa" checked> Hoa</label>
+<label><input type="checkbox" value="Phô" checked> Phô</label>
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+</div>
+
+<script>
+
+const squads=["Phương","Thân","Tiến","Hoa","Phô"];
+
+const colorMap={
+"Phương":"phuong",
+"Thân":"than",
+"Tiến":"tien",
+"Hoa":"hoa",
+"Phô":"pho"
+};
+
+const startDate=new Date(2026,2,9);
+
+let current=new Date(2026,2,1);
+
+function getSquad(date){
+
+let diff=Math.floor((date-startDate)/(1000*60*60*24));
+
+return squads[(diff%5+5)%5];
+
+}
+
+function render(){
+
+const cal=document.getElementById("calendar");
+cal.innerHTML="";
+
+const year=current.getFullYear();
+const month=current.getMonth();
+
+document.getElementById("monthLabel").innerText=
+`Tháng ${month+1}/${year}`;
+
+const headers=["T2","T3","T4","T5","T6","T7","CN"];
+
+headers.forEach(h=>{
+let div=document.createElement("div");
+div.className="header";
+div.innerText=h;
+cal.appendChild(div);
+});
+
+const firstDay=new Date(year,month,1);
+let startDay=(firstDay.getDay()+6)%7;
+
+for(let i=0;i<startDay;i++){
+
+let empty=document.createElement("div");
+empty.className="day";
+cal.appendChild(empty);
+
+}
+
+const daysInMonth=new Date(year,month+1,0).getDate();
+
+const selected=[...document.querySelectorAll(".squad-select input:checked")]
+.map(e=>e.value);
+
+const today=new Date();
+
+for(let d=1;d<=daysInMonth;d++){
+
+let date=new Date(year,month,d);
+
+let cell=document.createElement("div");
+cell.className="day";
+
+if(date.toDateString()===today.toDateString()){
+cell.classList.add("today");
+}
+
+let num=document.createElement("div");
+num.className="date";
+num.innerText=d;
+
+cell.appendChild(num);
+
+if(date.toDateString()===today.toDateString()){
+
+let label=document.createElement("div");
+label.className="today-label";
+label.innerText="HÔM NAY";
+
+cell.appendChild(label);
+
+}
+
+let squad=getSquad(date);
+
+if(selected.includes(squad) || date.toDateString()===today.toDateString()){
+
+let tag=document.createElement("div");
+tag.className="tag "+colorMap[squad];
+tag.innerText=squad;
+
+cell.appendChild(tag);
+
+}
+
+cal.appendChild(cell);
+
+}
+
+}
+
+function prevMonth(){
+
+if(current.getMonth()>2){
+current.setMonth(current.getMonth()-1);
+render();
+}
+
+}
+
+function nextMonth(){
+
+if(current.getMonth()<11){
+current.setMonth(current.getMonth()+1);
+render();
+}
+
+}
+
+function goToday(){
+
+let today=new Date();
+
+if(today.getFullYear()==2026 && today.getMonth()>=2 && today.getMonth()<=11){
+
+current=new Date(today.getFullYear(),today.getMonth(),1);
+
+}else{
+
+current=new Date(2026,2,1);
+
+}
+
+render();
+
+}
+
+let startX=0;
+
+document.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+});
+
+document.addEventListener("touchend",e=>{
+
+let endX=e.changedTouches[0].clientX;
+
+if(startX-endX>50) nextMonth();
+if(endX-startX>50) prevMonth();
+
+});
+
+document.querySelectorAll(".squad-select input")
+.forEach(e=>e.addEventListener("change",render));
+
+render();
+
+</script>
+
+</body>
+</html>
