@@ -367,6 +367,13 @@
         const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
         
         let diff = Math.round((checkDate - start) / (1000 * 60 * 60 * 24));
+        
+        // Thân trực 2 ngày 29, 30/5/2026 nên từ 30/5 lịch lùi lại 1 ngày
+        const changeDate1 = new Date(2026, 4, 30); // 30/05/2026
+        if (checkDate >= changeDate1) {
+            diff -= 1;
+        }
+
         return squads[(diff % 5 + 5) % 5];
     }
 
